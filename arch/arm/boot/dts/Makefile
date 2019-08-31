@@ -1,4 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0
+
+ifeq ($(CONFIG_OF_OVERLAY),y)
+DTC_FLAGS += -@
+endif
+
 dtb-$(CONFIG_ARCH_ALPINE) += \
 	alpine-db.dtb
 dtb-$(CONFIG_MACH_ARTPEC6) += \
@@ -577,9 +582,11 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ul-tx6ul-0010.dtb \
 	imx6ul-tx6ul-0011.dtb \
 	imx6ul-tx6ul-mainboard.dtb \
+	imx6ul-usbarmory.dtb \
 	imx6ull-14x14-evk.dtb \
 	imx6ull-colibri-eval-v3.dtb \
 	imx6ull-colibri-wifi-eval-v3.dtb \
+	imx6ull-usbarmory.dtb \
 	imx6ulz-14x14-evk.dtb
 dtb-$(CONFIG_SOC_IMX7D) += \
 	imx7d-cl-som-imx7.dtb \
@@ -730,6 +737,11 @@ dtb-$(CONFIG_SOC_AM33XX) += \
 	am335x-base0033.dtb \
 	am335x-bone.dtb \
 	am335x-boneblack.dtb \
+	am335x-bonegreen-wireless-uboot-univ.dtb \
+	am335x-boneblack-uboot-univ.dtb \
+	am335x-bone-uboot-univ.dtb \
+	am335x-boneblack-uboot.dtb \
+	am335x-abbbi.dtb \
 	am335x-boneblack-wireless.dtb \
 	am335x-boneblue.dtb \
 	am335x-bonegreen.dtb \
@@ -759,6 +771,7 @@ dtb-$(CONFIG_ARCH_OMAP4) += \
 	omap4-duovero-parlor.dtb \
 	omap4-kc1.dtb \
 	omap4-panda.dtb \
+	omap4-panda-es-b3.dtb \
 	omap4-panda-a4.dtb \
 	omap4-panda-es.dtb \
 	omap4-sdp.dtb \
@@ -1202,6 +1215,7 @@ dtb-$(CONFIG_MACH_ARMADA_370) += \
 	armada-370-db.dtb \
 	armada-370-dlink-dns327l.dtb \
 	armada-370-mirabox.dtb \
+	armada-370-smileplug.dtb \
 	armada-370-netgear-rn102.dtb \
 	armada-370-netgear-rn104.dtb \
 	armada-370-rd.dtb \

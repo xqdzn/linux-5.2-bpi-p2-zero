@@ -5,6 +5,8 @@
  * Author: Fabio Estevam <fabio.estevam@freescale.com>
  */
 
+#include <dt-bindings/gpio/gpio.h>
+
 / {
 	aliases {
 		backlight = &backlight;
@@ -62,17 +64,6 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		reg_usb_h1_vbus: regulator@0 {
-			compatible = "regulator-fixed";
-			reg = <0>;
-			regulator-name = "usb_h1_vbus";
-			regulator-min-microvolt = <5000000>;
-			regulator-max-microvolt = <5000000>;
-			enable-active-high;
-			startup-delay-us = <2>; /* USB2415 requires a POR of 1 us minimum */
-			gpio = <&gpio7 12 0>;
-		};
-
 		reg_panel: regulator@1 {
 			compatible = "regulator-fixed";
 			reg = <1>;
@@ -92,6 +83,17 @@
 			"Headphone Jack", "TX";
 		mux-int-port = <1>;
 		mux-ext-port = <6>;
+	};
+
+	udoo_ard: udoo_ard_manager {
+		compatible = "udoo,imx6q-udoo-ard";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_udooard>;
+		bossac-clk-gpio   = <&gpio6 3 0>;
+		bossac-dat-gpio   = <&gpio5 18 0>;
+		bossac-erase-gpio = <&gpio4 21 0>;
+		bossac-reset-gpio = <&gpio1 0 0>;
+		status = "okay";
 	};
 };
 
@@ -205,8 +207,17 @@
 
 		pinctrl_usbh: usbhgrp {
 			fsl,pins = <
-				MX6QDL_PAD_GPIO_17__GPIO7_IO12 0x80000000
+				MX6QDL_PAD_GPIO_17__GPIO7_IO12	0x1b0b0
 				MX6QDL_PAD_NANDF_CS2__CCM_CLKO2 0x130b0
+			>;
+		};
+
+		pinctrl_udooard: udooardgrp {
+			fsl,pins = <
+			MX6QDL_PAD_DISP0_DAT0__GPIO4_IO21       0x80000000
+			MX6QDL_PAD_CSI0_DAT17__GPIO6_IO03       0x80000000
+			MX6QDL_PAD_CSI0_PIXCLK__GPIO5_IO18      0x80000000
+			MX6QDL_PAD_GPIO_0__GPIO1_IO00           0x80000000
 			>;
 		};
 
@@ -282,9 +293,16 @@
 &usbh1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usbh>;
-	vbus-supply = <&reg_usb_h1_vbus>;
-	clocks = <&clks IMX6QDL_CLK_CKO>;
 	status = "okay";
+
+	usb2415: hub@1 {
+		compatible = "usb424,2514";
+		reg = <1>;
+
+		clocks = <&clks IMX6QDL_CLK_CKO>;
+		reset-gpios = <&gpio7 12 GPIO_ACTIVE_LOW>;
+		reset-duration-us = <3000>;
+	};
 };
 
 &usdhc3 {

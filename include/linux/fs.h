@@ -1333,6 +1333,7 @@ extern void fasync_free(struct fasync_struct *);
 /* can be called from interrupts */
 extern void kill_fasync(struct fasync_struct **, int, int);
 
+extern int setfl(int fd, struct file * filp, unsigned long arg);
 extern void __f_setown(struct file *filp, struct pid *, enum pid_type, int force);
 extern int f_setown(struct file *filp, unsigned long arg, int force);
 extern void f_delown(struct file *filp);
@@ -1812,6 +1813,7 @@ struct file_operations {
 	ssize_t (*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int);
 	unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long);
 	int (*check_flags)(int);
+	int (*setfl)(struct file *, unsigned long);
 	int (*flock) (struct file *, int, struct file_lock *);
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
@@ -1881,6 +1883,12 @@ ssize_t rw_copy_check_uvector(int type, const struct iovec __user * uvector,
 			      unsigned long nr_segs, unsigned long fast_segs,
 			      struct iovec *fast_pointer,
 			      struct iovec **ret_pointer);
+
+typedef ssize_t (*vfs_readf_t)(struct file *, char __user *, size_t, loff_t *);
+typedef ssize_t (*vfs_writef_t)(struct file *, const char __user *, size_t,
+				loff_t *);
+vfs_readf_t vfs_readf(struct file *file);
+vfs_writef_t vfs_writef(struct file *file);
 
 extern ssize_t __vfs_read(struct file *, char __user *, size_t, loff_t *);
 extern ssize_t vfs_read(struct file *, char __user *, size_t, loff_t *);
@@ -2315,6 +2323,7 @@ extern int current_umask(void);
 extern void ihold(struct inode * inode);
 extern void iput(struct inode *);
 extern int generic_update_time(struct inode *, struct timespec64 *, int);
+extern int update_time(struct inode *, struct timespec64 *, int);
 
 /* /sys/fs */
 extern struct kobject *fs_kobj;
@@ -2603,6 +2612,7 @@ static inline bool sb_is_blkdev_sb(struct super_block *sb)
 	return false;
 }
 #endif
+extern int __sync_filesystem(struct super_block *, int);
 extern int sync_filesystem(struct super_block *);
 extern const struct file_operations def_blk_fops;
 extern const struct file_operations def_chr_fops;
@@ -2615,6 +2625,12 @@ extern struct block_device *blkdev_get_by_path(const char *path, fmode_t mode,
 					       void *holder);
 extern struct block_device *blkdev_get_by_dev(dev_t dev, fmode_t mode,
 					      void *holder);
+extern struct block_device *bd_start_claiming(struct block_device *bdev,
+					      void *holder);
+extern void bd_finish_claiming(struct block_device *bdev,
+			       struct block_device *whole, void *holder);
+extern void bd_abort_claiming(struct block_device *bdev,
+			      struct block_device *whole, void *holder);
 extern void blkdev_put(struct block_device *bdev, fmode_t mode);
 extern int __blkdev_reread_part(struct block_device *bdev);
 extern int blkdev_reread_part(struct block_device *bdev);
@@ -2712,6 +2728,8 @@ extern int filemap_flush(struct address_space *);
 extern int filemap_fdatawait_keep_errors(struct address_space *mapping);
 extern int filemap_fdatawait_range(struct address_space *, loff_t lstart,
 				   loff_t lend);
+extern int filemap_fdatawait_range_keep_errors(struct address_space *mapping,
+		loff_t start_byte, loff_t end_byte);
 
 static inline int filemap_fdatawait(struct address_space *mapping)
 {

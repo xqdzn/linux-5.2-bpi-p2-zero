@@ -155,7 +155,10 @@ static int nommu_vma_show(struct seq_file *m, struct vm_area_struct *vma)
 	file = vma->vm_file;
 
 	if (file) {
-		struct inode *inode = file_inode(vma->vm_file);
+		struct inode *inode;
+
+		file = vma_pr_or_file(vma);
+		inode = file_inode(file);
 		dev = inode->i_sb->s_dev;
 		ino = inode->i_ino;
 		pgoff = (loff_t)vma->vm_pgoff << PAGE_SHIFT;
@@ -211,7 +214,11 @@ static void *m_start(struct seq_file *m, loff_t *pos)
 	if (!mm || !mmget_not_zero(mm))
 		return NULL;
 
-	down_read(&mm->mmap_sem);
+	if (down_read_killable(&mm->mmap_sem)) {
+		mmput(mm);
+		return ERR_PTR(-EINTR);
+	}
+
 	/* start from the Nth VMA */
 	for (p = rb_first(&mm->mm_rb); p; p = rb_next(p))
 		if (n-- == 0)

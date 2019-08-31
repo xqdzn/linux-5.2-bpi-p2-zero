@@ -553,7 +553,7 @@ static __latent_entropy int dup_mmap(struct mm_struct *mm,
 			struct inode *inode = file_inode(file);
 			struct address_space *mapping = file->f_mapping;
 
-			get_file(file);
+			vma_get_file(tmp);
 			if (tmp->vm_flags & VM_DENYWRITE)
 				atomic_dec(&inode->i_writecount);
 			i_mmap_lock_write(mapping);
@@ -727,7 +727,7 @@ void __put_task_struct(struct task_struct *tsk)
 	WARN_ON(tsk == current);
 
 	cgroup_free(tsk);
-	task_numa_free(tsk);
+	task_numa_free(tsk, true);
 	security_task_free(tsk);
 	exit_creds(tsk);
 	delayacct_tsk_free(tsk);

@@ -110,6 +110,7 @@ bool path_noexec(const struct path *path)
 	return (path->mnt->mnt_flags & MNT_NOEXEC) ||
 	       (path->mnt->mnt_sb->s_iflags & SB_I_NOEXEC);
 }
+EXPORT_SYMBOL_GPL(path_noexec);
 
 #ifdef CONFIG_USELIB
 /*
@@ -1828,7 +1829,7 @@ static int __do_execve_file(int fd, struct filename *filename,
 	membarrier_execve(current);
 	rseq_execve(current);
 	acct_update_integrals(current);
-	task_numa_free(current);
+	task_numa_free(current, false);
 	free_bprm(bprm);
 	kfree(pathbuf);
 	if (filename)

@@ -493,6 +493,24 @@ config PVPANIC
 	  a paravirtualized device provided by QEMU; it lets a virtual machine
 	  (guest) communicate panic events to the host.
 
+config TIEQEP
+	tristate "EQEP Hardware quadrature encoder controller"
+	depends on SOC_AM33XX
+	select PWM_TIPWMSS
+	help
+	  Driver support for the EQEP quadrature encoder controller AM33XX
+	  TI SOC
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called tieqep.
+
+config UDOO_ARD
+	tristate "UDOO-Arduino erase/reset Driver"
+	default y
+	help
+	  This driver is used to erase and reset arduino board via command sent
+	  over USB-to-SERIAL connection.
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
@@ -503,6 +521,7 @@ source "drivers/misc/mei/Kconfig"
 source "drivers/misc/vmw_vmci/Kconfig"
 source "drivers/misc/mic/Kconfig"
 source "drivers/misc/genwqe/Kconfig"
+source "drivers/misc/cape/Kconfig"
 source "drivers/misc/echo/Kconfig"
 source "drivers/misc/cxl/Kconfig"
 source "drivers/misc/ocxl/Kconfig"

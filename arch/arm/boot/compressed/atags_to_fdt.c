@@ -19,7 +19,7 @@ static int node_offset(void *fdt, const char *node_path)
 }
 
 static int setprop(void *fdt, const char *node_path, const char *property,
-		   uint32_t *val_array, int size)
+		   void *val_array, int size)
 {
 	int offset = node_offset(fdt, node_path);
 	if (offset < 0)
@@ -203,6 +203,12 @@ int atags_to_fdt(void *atag_list, void *fdt, int total_space)
 			hex_str(serno, atag->u.serialnr.high);
 			hex_str(serno+8, atag->u.serialnr.low);
 			setprop_string(fdt, "/", "serial-number", serno);
+		} else if (atag->hdr.tag == ATAG_MV_UBOOT) {
+			/* This ATAG provides up to 4 MAC addresses */
+			setprop(fdt, "eth0", "mac-address", atag->u.mv_uboot.macAddr[0], 6);
+			setprop(fdt, "eth1", "mac-address", atag->u.mv_uboot.macAddr[1], 6);
+			setprop(fdt, "eth2", "mac-address", atag->u.mv_uboot.macAddr[2], 6);
+			setprop(fdt, "eth3", "mac-address", atag->u.mv_uboot.macAddr[3], 6);
 		}
 	}
 
